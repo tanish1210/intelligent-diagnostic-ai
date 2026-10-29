@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab Analyzer Troubleshooter</title>
+<style>
+:root{--ink:#14262b;--mute:#4a6168;--bg:#f3f7f8;--card:#fff;--line:#d5e0e3;--pri:#281a78;--sky:#22aee8;--okbg:#dff3e6;--ok:#17653a;--wbg:#ffeed6;--w:#8a4a05;--on:#fff;--shell:#e4eaec;--chip:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--ink:#e8f0f2;--mute:#9db3ba;--bg:#10181b;--card:#182327;--line:#2c3c42;--pri:#4b3bc4;--okbg:#14301f;--ok:#7fd8a0;--wbg:#3a2a10;--w:#f2c27a;--shell:#0a0f11;--chip:#182327}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--shell);color:var(--ink);display:flex;justify-content:center;align-items:center}
+#app{width:100%;max-width:420px;height:100%;max-height:860px;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
+@media(min-width:500px){#app{height:min(860px,96vh);border-radius:28px;box-shadow:0 12px 40px rgba(0,0,0,.25);padding-top:0}}
+header{background:#281a78;color:#fff;padding:18px 20px}
+header h1{margin:0;font-size:22px}header p{margin:4px 0 0;font-size:14px;opacity:.9}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.15);margin-top:12px}.bar i{display:block;height:100%;border-radius:3px;background:var(--sky);transition:width .4s}
+main{flex:1;overflow-y:auto;padding:14px 16px}
+nav{display:flex;border-top:1px solid var(--line);background:var(--card);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:none;padding:14px 4px;font:inherit;font-size:13px;color:var(--mute);border-top:3px solid transparent;cursor:pointer}
+nav button.on{color:var(--pri);font-weight:600;border-top-color:var(--sky)}
+@media(prefers-color-scheme:dark){nav button.on{color:#b9b0ff}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.hero{background:#281a78;color:#fff;border-radius:18px;padding:18px;margin-bottom:16px}
+.hero h2{margin:0 0 6px;font-size:19px}.hero p{margin:0 0 14px;font-size:14px;opacity:.9}
+.btn{display:block;width:100%;border:2px solid #281a78;border-radius:12px;padding:13px;font:inherit;font-weight:600;font-size:15px;cursor:pointer;background:#fff;color:#281a78;text-align:center;text-decoration:none}
+.btn.p{background:#281a78;color:#fff}.btn.g{background:#1a8245;border-color:#1a8245;color:#fff}
+@media(prefers-color-scheme:dark){.btn:not(.p):not(.g):not(.cam){background:transparent;color:#cfc9ff;border-color:#6c5fe0}.btn.p{background:#4b3bc4;border-color:#4b3bc4}}
+.btn:focus-visible,.chip:focus-visible,nav button:focus-visible,input:focus-visible,.row:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.btn+.btn{margin-top:10px}
+h3.s{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:16px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--pri);color:var(--pri);background:var(--chip);border-radius:20px;padding:10px 16px;font:inherit;font-size:15px;cursor:pointer}
+@media(prefers-color-scheme:dark){.chip{color:#cfc9ff;border-color:#6c5fe0}}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
+.row b{display:block;font-size:16px}.row small{color:var(--mute);font-size:14px}
+.tag{font-size:13px;font-weight:600;border-radius:14px;padding:5px 12px;white-space:nowrap}
+.t-ok{background:var(--okbg);color:var(--ok)}.t-w{background:var(--wbg);color:var(--w)}
+.chat{display:flex;flex-direction:column;gap:10px}
+.b{max-width:82%;padding:11px 15px;border-radius:16px;font-size:15px;line-height:1.4;animation:in .2s}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+@media(prefers-reduced-motion:reduce){.b{animation:none}}
+.b.bot{background:var(--card);border:1px solid var(--line);align-self:flex-start}.b.bot small{display:block;color:var(--mute);margin-top:3px}
+.b.me{background:#281a78;color:#fff;align-self:flex-end}
+.photo{width:240px;height:140px;border-radius:10px;background:#c9d5d9;color:#33474d;font-size:13px;display:flex;align-items:flex-end;padding:8px}
+.acts{display:flex;gap:8px;margin-top:10px}.acts .btn{padding:9px 14px;width:auto;font-size:14px}
+.compose{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--card)}
+.compose input{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;background:var(--bg);color:var(--ink);min-height:46px}
+.sq{width:48px;border:2px solid #281a78;border-radius:12px;background:#fff;color:#281a78;font-size:20px;cursor:pointer}.sq.p{background:#281a78;color:#fff}
+.note{background:var(--wbg);color:var(--w);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.4;margin-bottom:12px}
+ol{margin:8px 0 0;padding-left:22px;line-height:1.5}li{margin-bottom:4px}
+.card h4{margin:0 0 4px;font-size:17px}
+.stats{display:flex;gap:10px;margin-bottom:8px}.stats div{flex:1;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 4px}
+.stats b{display:block;font-size:28px}.stats span{font-size:14px;color:var(--mute)}
+.search{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px;font:inherit;background:var(--card);color:var(--ink);margin:6px 0 4px}
+.splash{align-items:center;text-align:center;justify-content:center;background:#fff;color:#281a78;padding:30px}
+.logo{font-size:44px;font-weight:900;font-style:italic;color:#111}.logo i{color:var(--sky)}
+.cam{background:#0e0c2c;color:#fff;display:flex;flex-direction:column;height:100%;padding:20px}
+.cam .top{display:flex;justify-content:space-between;font-weight:600}.cam button.l{background:none;border:0;color:#fff;font:inherit;cursor:pointer}
+.view{flex:1;margin:18px 0;border-radius:22px;background:#221f55;display:flex;align-items:center;justify-content:center}
+.frame{width:62%;aspect-ratio:1;border:3px dashed var(--sky);border-radius:20px;display:flex;align-items:flex-end;justify-content:center;padding:10px;font-size:14px}
+.shut{width:76px;height:76px;border-radius:50%;border:4px solid #fff;background:#fff;box-shadow:inset 0 0 0 5px #0e0c2c;margin:14px auto 0;cursor:pointer;display:block}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:#14262b;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;z-index:9}
+.fade{animation:in .25s}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="fi" accept="image/*" hidden>
+<script>
+const FLOWS={
+asp:{title:'Aspiration error',machine:'3-part hematology analyzer',start:'Error on some samples, counts look low',
+ steps:[
+  {q:'Was the last end-of-day wash cycle done?',h:'Skipped washes leave dried blood in the probe.',o:['Yes, it was done','I think it was skipped','Not sure']},
+  {q:'Look at the probe tip. What do you see? Type it, tap an option, or send a photo.',photo:true,o:['Crust or dried blood','Bent or damaged','Looks clean'],ai:'dried crust on the tip of the sampling probe.',aiTook:'Crust or dried blood'}],
+ res:{'Crust or dried blood':'blocked','Bent or damaged':'bent','Looks clean':'air'}},
+cal:{title:'Calibration failing',machine:'Biochemistry analyzer',start:'Calibration keeps failing',
+ steps:[
+  {q:'How much of the lamp\u2019s rated life is used?',h:'The home screen shows this under the machine.',o:['Over 90%','50\u201390%','Under 50%']},
+  {q:'Which calibrator did you use? Tap an option or send a photo of the bottle.',photo:true,o:['Freshly opened','Opened weeks ago','Past expiry date'],ai:'a calibrator bottle with a handwritten opening date 6 weeks ago.',aiTook:'Opened weeks ago'}],
+ res:{'Freshly opened':'lamp','Opened weeks ago':'calib','Past expiry date':'calib'},first:{'Over 90%':'lamp'}},
+dead:{title:'Machine dead',machine:'3-part hematology analyzer',start:'The machine will not switch on',
+ steps:[
+  {q:'Is any light on the machine or its power adapter on?',h:'Check the back panel near the power socket.',o:['No light at all','Light is on','Light is blinking']},
+  {q:'Is the wall socket working? Try another device, or photograph the power area.',photo:true,o:['Socket is dead','Socket works','UPS is beeping'],ai:'a power inlet with a blackened fuse holder.',aiTook:'Socket works'}],
+ res:{'Socket is dead':'socket','Socket works':'psu','UPS is beeping':'socket'}},
+other:{title:'Other problem',machine:'Machine to be confirmed',start:'',
+ steps:[
+  {q:'Which machine has the problem?',h:'Tap one or type the name.',o:['3-part hematology analyzer','Biochemistry analyzer','Centrifuge']},
+  {q:'Did anything change just before this started?',h:'New reagent, power cut, cleaning or a move can all matter.',o:['New reagent or calibrator','Power cut or surge','Nothing changed']},
+  {q:'Look at the machine. What do you see? Tap an option, type it, or send a photo of the display or the part.',photo:true,o:['Error code on display','Leak or liquid','Strange noise or smell'],ai:'an error code on the display screen.',aiTook:'Error code on display'}],
+ res:{'Error code on display':'code','Leak or liquid':'leak','Strange noise or smell':'noise'}}
+};
+const RES={
+code:{t:'Error code needs checking',d:'An error code usually points to one named fault in your manual.',fix:1,what:['Write down the exact code and read it in your machine manual.','Restart the machine once and wait for the self-check.','Run a blank, then a control.'],warn:'Do not clear the same error again and again. Follow your machine manual.',name:'Error code on display'},
+leak:{t:'Leak inside or under the machine',d:'Liquid where it should not be points to a loose tube, valve or pump.',fix:0,what:['Switch the machine off.','Wipe up any liquid and keep the area dry.','Call the service engineer.'],warn:'Do not open the machine. Treat spills as biohazard and wear gloves.',name:'Leak in machine'},
+noise:{t:'Mechanical or electrical fault',d:'Grinding, clicking or a burning smell can mean a worn part or an electrical problem.',fix:0,what:['Stop running samples.','Switch the machine off at the wall.','Call the service engineer.'],warn:'If you smell burning, unplug the machine and keep clear.',name:'Noise or smell from machine'},
+blocked:{t:'Partly blocked probe (dried blood)',d:'Skipped wash plus a crusted tip is the classic cause of on-and-off aspiration errors.',fix:1,what:['Run the Wash/Cleaning cycle with the company\u2019s cleaning solution.','If your manual allows, soak the probe tip and wipe with a lint-free cloth.','Run a blank, then a control.'],warn:'Do not poke the probe with a pin or wire. Follow your machine\u2019s manual.',name:'Blocked probe'},
+air:{t:'Air in the reagent line',d:'A clean probe with low counts often means an air bubble or low reagent.',fix:1,what:['Check reagent bottle levels and replace any that are low.','Run the Prime/Flush cycle once.','Run a blank, then a control.'],warn:'Wear gloves when handling reagent bottles.',name:'Air in reagent line'},
+bent:{t:'Damaged sampling probe',d:'A bent probe cannot aspirate properly and needs a replacement part.',fix:0,what:['Do not run more samples.','Switch the machine off.','Call the service engineer.'],warn:'Do not try to straighten the probe.',name:'Damaged probe'},
+lamp:{t:'Ageing lamp',d:'A lamp near the end of its rated life gives unstable readings, so calibration fails.',fix:1,what:['Check the lamp hours on the Machines tab.','Replace the lamp as per your manual and let it warm up for 30 minutes.','Run a blank, then recalibrate.'],warn:'Let the lamp cool fully before touching it.',name:'Calibration failed: ageing lamp'},
+calib:{t:'Old or expired calibrator',d:'Calibrator that was opened weeks ago or is past expiry gives a wrong curve.',fix:1,what:['Open a fresh calibrator bottle.','Run the calibration again.','Run a blank, then a control.'],warn:'Never top up an old bottle with new calibrator.',name:'Calibration failed: old calibrator'},
+socket:{t:'No power reaching the machine',d:'The fault is outside the analyzer: socket, UPS or extension cord.',fix:1,what:['Plug the machine into a working socket.','Reset or replace the UPS.','Switch on and wait for the self-check.'],warn:'Do not open the machine or touch the fuse.',name:'No power at socket'},
+psu:{t:'Power supply failure',d:'Power reaches the machine but it does not start. The fault is inside.',fix:0,what:['Switch the machine off at the wall.','Do not open it.','Call the service engineer.'],warn:'Do not open the machine. Send urgent samples to a partner lab.',name:'Power supply failure'}
+};
+const MACH=[{n:'3-part hematology analyzer',s:'Last wash: yesterday morning',tag:'Wash due',w:1},{n:'Biochemistry analyzer',s:'Lamp: 96% of rated life',tag:'Check lamp',w:1},{n:'Centrifuge',s:'Serviced 2 months ago',tag:'All clear',w:0}];
+let reports=[{n:'Blocked probe',m:'Hematology analyzer',d:'29 Oct',st:'Fixed'},{n:'Calibration failed: ageing lamp',m:'Biochemistry analyzer',d:'24 Oct',st:'Fixed'},{n:'Power supply failure',m:'Hematology analyzer',d:'12 Oct',st:'Engineer'},{n:'Air in reagent line',m:'Hematology analyzer',d:'3 Oct',st:'Fixed'}];
+const S={scr:'splash',tab:'home',mach:null,imsgs:[],from:'chat',flow:null,msgs:[],step:0,res:null,ans:{},pend:null,q:'',saved:false};
+const $=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nav=()=>'<nav>'+[['home','Home'],['diag','Diagnose'],['rep','Reports'],['mach','Machines']].map(([k,l])=>`<button data-a="tab" data-v="${k}" class="${S.tab===k?'on':''}">${l}</button>`).join('')+'</nav>';
+const hdr=(h,p,bar)=>`<header><h1>${h}</h1><p>${p}</p>${bar!=null?`<div class="bar"><i style="width:${bar}%"></i></div>`:''}</header>`;
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;$.appendChild(e);setTimeout(()=>e.remove(),2200)}
+function render(){
+ const sc=S.scr;let h='';
+ if(sc==='splash')h=`<div class="card splash" style="flex:1;margin:0;border:0;border-radius:0;display:flex;flex-direction:column"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="logo">+med<i style="font-size:20px;font-style:normal"> source</i></div><h2 style="margin-top:28px">Lab Analyzer Troubleshooter</h2></div><div style="width:100%"><div class="bar" style="background:#dbe8f3"><i id="ld" style="width:5%"></i></div><p style="color:#4a6168">Loading your machines\u2026</p><small style="color:#4a6168">Version 1.0</small></div></div>`;
+ else if(sc==='cam')h=`<div class="cam"><div class="top"><button class="l" data-a="camcancel">Cancel</button><span>Probe tip</span><button class="l" data-a="camhelp">Help</button></div><div class="view"><div class="frame">Camera preview (sample)</div></div><p style="text-align:center;font-size:14px;line-height:1.5;margin:0">Fit the item inside the frame. Use good light and hold steady.<br>You can also photograph the display, a reagent bottle or the power area.</p><button class="shut" data-a="shoot" aria-label="Take photo"></button><button class="l" data-a="upload" style="margin:10px auto 0;display:block">Upload from gallery</button></div>`;
+ else if(sc==='main'){
+  let body='';
+  if(S.tab==='home')body=hdr('Good morning, Ramesh','Sunrise Diagnostics, Lucknow')+`<main class="fade"><div class="hero"><h2>Something wrong with a machine?</h2><p>Answer a few questions or send a photo. We will find the likely cause.</p><button class="btn" data-a="tab" data-v="diag">Start a diagnosis</button></div><h3 class="s">Common problems</h3><div class="chips">${Object.entries(FLOWS).filter(([k])=>k!=='other').map(([k,f])=>`<button class="chip" data-a="start" data-v="${k}">${f.title.replace('Calibration failing','Calibration failing')}</button>`).join('')}</div><h3 class="s">Your machines</h3>${MACH.map(m=>`<div class="card row"><div><b>${m.n}</b><small>${m.s}</small></div><span class="tag ${m.w?'t-w':'t-ok'}">${m.tag}</span></div>`).join('')}</main>`;
+  if(S.tab==='diag')body=hdr('Diagnose','What is the problem?')+`<main class="fade"><p style="margin-top:0">Pick the closest match. We will ask a few short questions.</p>${Object.entries(FLOWS).filter(([k])=>k!=='other').map(([k,f])=>`<div class="card row" tabindex="0" data-a="start" data-v="${k}"><div><b>${f.title}</b><small>${f.machine}</small></div><span class="tag t-ok">Start</span></div>`).join('')}<div class="card"><h4>Problem not listed?</h4><small style="color:var(--mute);font-size:14px">Describe it in your own words and we will start the chat.</small><div style="display:flex;gap:8px;margin-top:10px"><input class="search" style="margin:0" id="cu" placeholder="e.g. Machine making a grinding noise" aria-label="Describe the problem"><button class="sq p" data-a="custom" aria-label="Start chat">\u27a4</button></div></div></main>`;
+  if(S.tab==='rep'){const st=n=>reports.filter(r=>r.st===n).length;const l=reports.filter(r=>(r.n+r.m).toLowerCase().includes(S.q.toLowerCase()));
+   body=hdr('Reports','Every diagnosis, saved for your logbook')+`<main class="fade"><div class="stats"><div><b>${reports.length}</b><span>This month</span></div><div><b>${st('Fixed')}</b><span>Fixed in lab</span></div><div><b>${st('Engineer')}</b><span>Engineer</span></div></div><input class="search" id="q" placeholder="Search reports" value="${esc(S.q)}" aria-label="Search reports"><h3 class="s">Recent</h3><div id="rl">${repList(l)}</div></main>`;}
+  if(S.tab==='mach')body=hdr('Machines','Tap one to start a diagnosis')+`<main class="fade">${MACH.map(m=>`<div class="card row" tabindex="0" data-a="start" data-v="${m.n.startsWith('Bio')?'cal':'asp'}"><div><b>${m.n}</b><small>${m.s}</small></div><span class="tag ${m.w?'t-w':'t-ok'}">${m.tag}</span></div>`).join('')}</main>`;
+  h=body+nav();
+ }
+ else if(sc==='intro'){h=introHtml()}
+ else if(sc==='intro_old'){h=hdr('Diagnose','Tell us what is wrong',8)+`<main id="ch"><div class="chat"><div class="b bot">What is going wrong? Describe it in your own words, or tap a common problem.<small>Example: counts look low on some samples.</small></div></div></main><div style="padding:8px 16px 4px" class="chips">${Object.entries(FLOWS).filter(([k])=>k!=='other').map(([k,f])=>`<button class="chip" data-a="start" data-v="${k}">${f.title}</button>`).join('')}</div><div class="compose"><input id="cu" placeholder="Describe the problem" aria-label="Describe the problem"><button class="sq p" data-a="custom" aria-label="Send">\u27a4</button></div>`+nav();}
+ else if(sc==='chat'){const f=FLOWS[S.flow];const last=S.step>=f.steps.length;
+  const pct=Math.min(90,15+S.step*35);
+  const st=f.steps[S.step];
+  h=hdr('Diagnose: '+f.title.toLowerCase(),f.machine,pct)+`<main id="ch"><div class="chat">${S.msgs.map(m=>m.t==='me'?`<div class="b me">${esc(m.x)}</div>`:m.t==='ph'?`<div class="b me"><div class="photo" style="${m.img?`background:url(${m.img}) center/cover`:''}">Photo: ${esc(m.x)}</div></div>`:m.t==='ai'?`<div class="b bot"><b>I can see:</b> ${esc(m.x)}<small>I took this as: ${esc(m.k)}</small>${m.pending?`<div class="acts"><button class="btn p" data-a="aiyes">Yes, correct</button><button class="btn" data-a="aino">Not right</button></div>`:''}</div>`:`<div class="b bot">${esc(m.x)}${m.h?`<small>${esc(m.h)}</small>`:''}</div>`).join('')}</div></main>`+
+  (S.pend||!st?'':`<div style="padding:8px 16px 4px" class="chips">${st.o.map(o=>`<button class="chip" data-a="ans" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div><div class="compose">${st.photo?'<button class="sq" data-a="cam" aria-label="Add a photo">\ud83d\udcf7</button>':''}<input id="tx" placeholder="Type what you see" aria-label="Type your answer"><button class="sq p" data-a="send" aria-label="Send">\u27a4</button></div>`)+
+  `<div style="padding:6px 16px 10px;text-align:center"><button class="chip" style="font-size:13px;padding:6px 12px" data-a="quit">Cancel diagnosis</button></div>`;
+ }
+ else if(sc==='res'){const r=RES[S.res];
+  h=hdr('Likely cause found',FLOWS[S.flow].machine+', '+FLOWS[S.flow].title.toLowerCase())+`<main class="fade"><div class="card"><span class="tag ${r.fix?'t-ok':'t-w'}">${r.fix?'You can fix this':'Needs an engineer'}</span><h4 style="margin-top:10px">${r.t}</h4><small style="color:var(--mute);font-size:14px">${r.d}</small></div><div class="card"><h4>What to do</h4><ol>${r.what.map(x=>`<li>${x}</li>`).join('')}</ol></div>${r.fix?`<div class="card"><h4>Then verify</h4><ol><li>Run a control three times. All must be in range.</li><li>Re-run the patient samples that gave bad results.</li><li>Write the cause and fix in the logbook.</li></ol></div>`:''}<div class="note">${r.warn}</div>${r.fix?`<div style="display:flex;gap:10px"><button class="btn p" data-a="save">Save report</button><button class="btn" data-a="nofix">Did not fix it</button></div>`:`<button class="btn p" data-a="nofix">Call the service engineer</button>`}</main>`+nav();
+ }
+ else if(sc==='eng'){const r=RES[S.res],f=FLOWS[S.flow];
+  const msg=`Hello, the ${f.machine.toLowerCase()} at Sunrise Diagnostics shows: ${f.title.toLowerCase()} (${r.t.toLowerCase()}). ${r.fix?'Steps above done, results still not right.':'Machine switched off.'} Report attached. Please advise.`;S.msg=msg;
+  h=hdr('Call the service engineer',r.fix?'The steps did not fix it, so the fault is probably inside the machine. Your report goes along with the message.':'This needs an engineer. Your report goes along with the message.')+`<main class="fade"><div class="card row" style="cursor:default"><div style="display:flex;gap:12px;align-items:center"><div style="width:48px;height:48px;border-radius:50%;background:#dbeefa;color:#281a78;font-weight:700;display:flex;align-items:center;justify-content:center">SK</div><div><b>Suresh Kumar</b><small>Service engineer, Lucknow</small></div></div><span class="tag t-ok">Available</span></div><a class="btn p" href="tel:+910000000000" data-a="callrec">\ud83d\udcde Call engineer</a><a class="btn g" style="margin-top:10px" target="_blank" rel="noopener" href="https://wa.me/910000000000?text=${encodeURIComponent(msg)}" data-a="callrec">WhatsApp engineer</a><div class="card" style="margin-top:12px"><h3 class="s" style="margin-top:0">Message that will be sent</h3><div style="background:var(--bg);border-radius:10px;padding:12px;line-height:1.45">${esc(msg)}</div><p style="color:var(--mute);margin:12px 0 4px">Checks already done:</p><ul style="margin:0;padding-left:20px;line-height:1.6"><li>Sample ruled out</li><li>${r.fix?'Steps above followed':'Machine stopped'}</li><li>Reagent and tubes checked</li></ul></div><div class="note">Switch the machine off and do not open it. Send urgent samples to a partner lab.</div><button class="btn" data-a="back">Back to steps</button></main>`+nav();
+ }
+ $.innerHTML=h;
+if(S.sheet)$.insertAdjacentHTML('beforeend','<div style="position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:8;display:flex;align-items:flex-end"><div class="card" style="width:100%;margin:0;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))"><h4 style="margin-bottom:12px">Add a photo</h4><button class="btn p" data-a="sheettake">Take a photo</button><button class="btn" data-a="sheetup">Upload from gallery</button><button class="btn" style="border-color:transparent" data-a="sheetx">Cancel</button></div></div>');
+ const c=document.getElementById('ch');if(c)c.scrollTop=c.scrollHeight;
+ if(sc==='splash'){let p=5;const t=setInterval(()=>{p+=9;const e=document.getElementById('ld');if(e)e.style.width=Math.min(p,100)+'%';if(p>=100){clearInterval(t);S.scr='main';render()}},120)}
+}
+function repList(l){return l.length?l.map(r=>`<div class="card row" style="cursor:default"><div><b>${esc(r.n)}</b><small>${esc(r.m)}, ${r.d}</small></div><span class="tag ${r.st==='Fixed'?'t-ok':'t-w'}">${r.st}</span></div>`).join(''):'<p style="color:var(--mute)">No reports match. Try a different word.</p>'}
+Object.values(FLOWS).forEach(f=>f.dm=f.machine);
+function bubs(ms){return ms.map(m=>m.t==='me'?`<div class="b me">${esc(m.x)}</div>`:m.t==='ph'?`<div class="b me"><div class="photo" style="${m.img?`background:url(${m.img}) center/cover`:''}">Photo</div></div>`:m.t==='ai'?`<div class="b bot"><b>I can see:</b> ${esc(m.x)}<small>I took this as: ${esc(m.k)}</small>${m.pending?`<div class="acts"><button class="btn p" data-a="iyes">Yes, correct</button><button class="btn" data-a="ino">Not right</button></div>`:''}</div>`:`<div class="b bot">${esc(m.x)}${m.h?`<small>${esc(m.h)}</small>`:''}</div>`).join('')}
+function introHtml(){const pend=S.imsgs.some(m=>m.pending);const chips=!S.mach?MACH.map(m=>`<button class="chip" data-a="mach" data-v="${esc(m.n)}">${esc(m.n)}</button>`).join(''):Object.entries(FLOWS).filter(([k])=>k!=='other').map(([k,f])=>`<button class="chip" data-a="istart" data-v="${k}">${f.title}</button>`).join('');return hdr('Diagnose',S.mach||'Choose a machine',S.mach?20:8)+`<main id="ch"><div class="chat">${bubs(S.imsgs)}</div></main>`+(pend?'':`<div style="padding:8px 16px 4px" class="chips">${chips}</div>`)+(S.mach&&!pend?`<div class="compose"><button class="sq" data-a="icam" aria-label="Take a photo">\ud83d\udcf7</button><input id="cu" placeholder="Describe the problem" aria-label="Describe the problem"><button class="sq p" data-a="custom" aria-label="Send">\u27a4</button></div>`:'')+nav()}
+function doShoot(img){if(S.from==='intro'){const M=S.mach||'';const r=/hemat/i.test(M)?{k:'asp',x:'dried crust on the tip of the sampling probe.',t:'Aspiration error'}:/bioch/i.test(M)?{k:'cal',x:'a calibration failure message on the display.',t:'Calibration failing'}:{k:'other',x:'a part that needs a closer look.',t:'Other problem'};S.imsgs.push({t:'ph',x:'item',img});S.imsgs.push({t:'ai',x:r.x,k:r.t,pending:1,fk:r.k});S.scr='intro';render()}else{const s=FLOWS[S.flow].steps[S.step];S.msgs.push({t:'ph',x:'item',img});S.msgs.push({t:'ai',x:s.ai,k:s.aiTook,pending:1});S.pend=1;S.scr='chat';render()}}
+function ask(){const f=FLOWS[S.flow],s=f.steps[S.step];if(s)S.msgs.push({t:'bot',x:s.q,h:s.h})}
+function startCustom(x){const l=x.toLowerCase();const k=/aspirat|probe|low count/.test(l)?'asp':/calibrat/.test(l)?'cal':/dead|not switch|no power|won.?t (turn|switch|start)/.test(l)?'dead':'other';if(k==='other'){FLOWS.other.title=x.length>28?x.slice(0,28)+'\u2026':x;}start(k,x,S.mach)}
+function start(k,txt,m){const f0=FLOWS[k];f0.machine=m||f0.dm;S.flow=k;S.step=(k==='other'&&m)?1:0;S.pend=null;S.saved=false;S.msgs=[{t:'me',x:txt||f0.start}];ask();S.scr='chat';render()}
+function answer(v){const f=FLOWS[S.flow];S.msgs.push({t:'me',x:v});if(S.flow==='other'&&S.step===0)f.machine=v;S.ans[S.step]=v;
+ if(S.step===0&&f.first&&f.first[v]){return finish(f.first[v])}
+ S.step++;
+ if(S.step>=f.steps.length){const s=f.steps[S.step-1];const key=s.o.find(o=>v.toLowerCase().includes(o.toLowerCase().split(' ')[0]))||s.o[0];return finish(f.res[key])}
+ ask();render()}
+function finish(r){S.res=r;S.scr='res';S.tab='diag';render()}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,v=t.dataset.v;
+ if(a==='tab'){S.tab=v;if(v==='diag'){S.mach=null;S.imsgs=[{t:'bot',x:'Which machine has the problem?',h:'Tap one below.'}]}S.scr=v==='diag'?'intro':'main';render()}
+ else if(a==='start')start(v);
+ else if(a==='mach'){S.mach=v;S.imsgs.push({t:'me',x:v},{t:'bot',x:'What is going wrong? Describe it in your own words, tap a common problem, or send a photo.'});render()}
+ else if(a==='istart')start(v,null,S.mach);
+ else if(a==='icam'){S.from='intro';S.sheet=1;render()}
+ else if(a==='upload'){if(S.scr!=='cam')S.from=S.scr==='intro'?'intro':'chat';document.getElementById('fi').click()}
+ else if(a==='iyes'){const m=S.imsgs.find(x=>x.pending);S.imsgs.forEach(x=>x.pending=0);start(m.fk,'Sent a photo: '+m.k.toLowerCase(),S.mach)}
+ else if(a==='ino'){S.imsgs.forEach(x=>x.pending=0);S.imsgs.push({t:'bot',x:'Sorry about that. Please describe the problem in your own words, or tap a common problem.'});render()}
+ else if(a==='custom'){const i=document.getElementById('cu'),x=i&&i.value.trim();if(!x)toast('Describe the problem first');else startCustom(x)}
+ else if(a==='ans')answer(v);
+ else if(a==='send'){const i=document.getElementById('tx');if(i&&i.value.trim())answer(i.value.trim());else toast('Type what you see, or tap an option')}
+ else if(a==='cam'){S.from='chat';S.sheet=1;render()}
+ else if(a==='sheettake'){S.sheet=0;S.scr='cam';render()}
+ else if(a==='sheetup'){S.sheet=0;render();document.getElementById('fi').click()}
+ else if(a==='sheetx'){S.sheet=0;render()}
+ else if(a==='camcancel'){S.scr=S.from;render()}
+ else if(a==='camhelp')toast('Hold the phone 15 cm away, with light on the item')
+ else if(a==='shoot')doShoot()
+ else if(a==='aiyes'){const s=FLOWS[S.flow].steps[S.step];S.pend=null;S.msgs.forEach(m=>m.pending=0);answer(s.aiTook)}
+ else if(a==='aino'){S.pend=null;S.msgs.forEach(m=>m.pending=0);S.msgs.push({t:'bot',x:'Sorry about that. Please tap what you see, or type it.'});render()}
+ else if(a==='save'){reports.unshift({n:RES[S.res].name,m:FLOWS[S.flow].machine.replace('3-part h','H').replace('Biochemistry analyzer','Biochemistry analyzer'),d:'29 Oct',st:'Fixed'});toast('Report saved');S.tab='rep';S.scr='main';render()}
+ else if(a==='nofix'){S.scr='eng';render()}
+ else if(a==='callrec'){if(!S.saved){reports.unshift({n:RES[S.res].name,m:FLOWS[S.flow].machine,d:'29 Oct',st:'Engineer'});S.saved=1;toast('Report sent with your message')}}
+ else if(a==='back'){S.scr='res';render()}
+ else if(a==='quit'){S.scr='main';S.tab='home';render()}
+});
+document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;document.getElementById('rl').innerHTML=repList(reports.filter(r=>(r.n+r.m).toLowerCase().includes(S.q.toLowerCase())))}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='tx')document.querySelector('[data-a=send]').click();else if(e.target.id==='cu')document.querySelector('[data-a=custom]').click();else if(e.target.classList.contains('row')&&e.target.dataset.a)e.target.click()}});
+document.getElementById('fi').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const u=URL.createObjectURL(f);e.target.value='';doShoot(u)});
+render();
+</script>
+</body>
+</html>
